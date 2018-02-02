@@ -62,7 +62,7 @@ txProcessTransaction
     => (TxId, TxAux) -> m (Either ToilVerFailure ())
 txProcessTransaction itw =
     withStateLock LowPriority ProcessTransaction $ \__tip -> txProcessTransactionNoLock itw
-
+    -- probably error because of ^^^^^^^^^^^^
 -- | Unsafe version of 'txProcessTransaction' which doesn't take a
 -- lock. Can be used in tests.
 txProcessTransactionNoLock ::

@@ -36,14 +36,14 @@ txCntInChainMemPoolToCSV f sp txCnt mp =
     draw = (<= sp) <$> getRandomR (0, 1)
 
     inSample :: MonadRandom m => MemPoolModifyReason -> m Bool
-    inSample ProcessTransaction = draw
-    inSample _                      = return True
+    inSample (ProcessTransaction _) = draw
+    inSample  _                     = return True
 
     toTxType :: String -> JLMemPool -> String
     toTxType s JLMemPool{..} =
         let reason = case jlmReason of
-                ApplyBlock           -> "ApplyBlock"
-                ProcessTransaction   -> "ProcessTransaction"
+                 ApplyBlock            -> "ApplyBlock"
+                (ProcessTransaction _) -> "ProcessTransaction"
         in  "mp_" ++ reason ++ "_" ++ s
 
 focusToCSV :: FilePath -> [(Timestamp, NodeId, Focus)] -> IO ()

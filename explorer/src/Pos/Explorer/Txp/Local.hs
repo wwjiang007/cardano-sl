@@ -46,7 +46,7 @@ eTxProcessTransaction ::
     -> m (Either ToilVerFailure ())
 eTxProcessTransaction itw =
     withStateLock LowPriority ProcessTransaction $ \__tip -> eTxProcessTransactionNoLock itw
-
+    -- probably error because of ^^^^^^^^^^^^
 eTxProcessTransactionNoLock ::
        forall ctx m. (ETxpLocalWorkMode ctx m)
     => (TxId, TxAux)

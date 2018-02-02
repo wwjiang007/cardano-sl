@@ -56,6 +56,8 @@ $(deriveJSON defaultOptions ''TransactionProvenance)
 data MemPoolModifyReason =
       -- | Apply a block created by someone else.
       ApplyBlock
+      -- | Apply a block, with rollback
+    | ApplyBlockWithRollback
       -- | Apply a block created by us.
     | CreateBlock
       -- | Include a transaction. It came from this peer.
