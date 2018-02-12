@@ -2,7 +2,7 @@
 # call: Rscript ../plots.r 2018-02-03_053826
 # (curr. workdir is where the run-???.csv is)
 #
-# packages to install: dplyr, ggplot2, svglite, gplots
+# packages to install: dplyr, ggplot2, svglite, gplots, anytime
 # (e.g. install.packages('svglite'))
 #
 
@@ -12,9 +12,10 @@ INTERACTIVE <- FALSE
 library(dplyr)
 library(ggplot2)
 library(gplots)
+library(anytime)
 
 if (INTERACTIVE) {
-  library('ggedit')    # only if interactive editing
+  #library('ggedit')    # only if interactive editing
   fnames <- file.choose()
   fname <- fnames[1]
   RUN <- sub('.*run-([-_0-9]+).csv', '\\1', fname)
@@ -26,8 +27,8 @@ if (INTERACTIVE) {
   RUN <- args[1]
   fname <- paste('run-', RUN, '.csv', sep='')
   fname2 <- paste('report_', RUN, '.txt', sep='')
+  fname3 <- 'bench-settings'
 }
-#RUN <- '2018-02-03_053826' # Select run to plot
 
 DESC=''                    # Add custom text to titles
 k <- 6                     # Protocol parameters determining
@@ -120,13 +121,25 @@ histTxs <- function(d, run=RUN, desc=DESC) {
   crit <- "submitted"
   dd <- d %>%
     filter(txType %in% c(crit))
+#  ggplot(dd, aes(txCount)) + stat_ecdf(geom="step") +
+#      ggtitle(paste(crit, 'transactions', desc, sep = ' ')) +
+#      ylab("") + xlab(paste("tx", crit, sep=" "))
+
+#  qqplot(x=1:length(dd$txCount), y=dd$txCount, xlab="", ylab="tx/slot", main=paste(crit, 'transactions', desc, sep = ' '))
+
   hist(dd$txCount, main=paste('transaction count per slot', desc, sep = ' ')
        , breaks=seq(0,maxtx, by=1)
        , col=gray.colors(maxtx/2)
        , xlab = crit )
   crit <- "written"
   dd <- d %>%
-  filter(txType %in% c(crit))
+    filter(txType %in% c(crit))
+#  ggplot(dd, aes(txCount)) + stat_ecdf(geom="step") +
+#      ggtitle(paste(crit, 'transactions', desc, sep = ' ')) +
+#      ylab("") + xlab(paste("tx", crit, sep=" "))
+
+#  qqplot(x=1:length(dd$txCount), y=dd$txCount, xlab="", ylab="tx/slot", main=paste(crit, 'transactions', desc, sep = ' '))
+
   hist(dd$txCount, main=paste('transaction count per slot', desc, sep = ' ')
        , breaks=seq(0,maxtx, by=1)
        , col=gray.colors(maxtx/2)
@@ -230,3 +243,4 @@ ggsave(paste('times-', RUN, '.png', sep=''))
 # example: observe only core nodes:
 plotMempools(data %>% filter(!(node %in% relays)))
 plotTimes(data %>% filter(!(node %in% relays)))
+
