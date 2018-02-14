@@ -103,14 +103,15 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
         logInfo $ sformat ("Found "%shown%" keys in the genesis block.") (length keysToSend)
         startAtTxt <- liftIO $ lookupEnv "AUXX_START_AT"
         let startAt = fromMaybe 0 . readMaybe . fromMaybe "" $ startAtTxt :: Int
+        -- construct transaction output
+        outAddr <- makePubKeyAddressAuxx (toPublic (fromMaybe (error "sendToAllGenesis: no keys") $ head keysToSend))
+        let val1 = mkCoin 1
+            txOut1 = TxOut {
+                txOutAddress = outAddr,
+                txOutValue = val1
+                }
+            txOuts = TxOutAux txOut1 :| []
         forM_ (drop startAt keysToSend) $ \secretKey -> do
-            outAddr <- makePubKeyAddressAuxx (toPublic secretKey)
-            let val1 = mkCoin 1
-                txOut1 = TxOut {
-                    txOutAddress = outAddr,
-                    txOutValue = val1
-                    }
-                txOuts = TxOutAux txOut1 :| []
             atomically $ writeTQueue txQueue (secretKey, txOuts)
 
             -- every <slotDuration> seconds, write the number of sent and failed transactions to a CSV file.
