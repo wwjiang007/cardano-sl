@@ -111,7 +111,7 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                 txOutValue = val1
                 }
             txOuts = TxOutAux txOut1 :| []
-        forM_ (drop startAt keysToSend) $ \secretKey -> do
+        forM_ (take (conc * duration) (drop startAt keysToSend)) $ \secretKey -> do
             utxo <- getOwnUtxoForPk $ safeToPublic (fakeSigner secretKey)
             etx <- createTx mempty utxo (fakeSigner secretKey) txOuts (toPublic secretKey)
             case etx of
