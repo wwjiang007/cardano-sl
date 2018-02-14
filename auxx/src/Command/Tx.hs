@@ -112,7 +112,13 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                 }
             txOuts = TxOutAux txOut1 :| []
         forM_ (drop startAt keysToSend) $ \secretKey -> do
-            atomically $ writeTQueue txQueue (secretKey, txOuts)
+            utxo <- getOwnUtxoForPk $ safeToPublic (fakeSigner secretKey)
+            etx <- createTx mempty utxo (fakeSigner secretKey) txOuts (toPublic secretKey)
+            case etx of
+                Left err -> do
+                    addTxFailed tpsMVar
+                    logError (sformat ("Error: "%build%" while trying to contruct tx") err)
+                Right (tx, _) -> atomically $ writeTQueue txQueue (tx, txOuts)
 
             -- every <slotDuration> seconds, write the number of sent and failed transactions to a CSV file.
         let writeTPS :: m ()
@@ -126,8 +132,8 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                     liftIO $ T.hPutStrLn h $ T.intercalate "," [curTime, show $ failed, "failed"]
                     return (TxCount 0 0 sending, sending <= 0)
                 if finished
-                then logInfo "Finished writing TPS samples."
-                else writeTPS
+                    then logInfo "Finished writing TPS samples."
+                    else writeTPS
             -- Repeatedly take transactions from the queue and send them.
             -- Do this n times.
             sendTxs :: Int -> m ()
@@ -137,19 +143,12 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                       modifySharedAtomic tpsMVar $ \(TxCount submitted failed sending) ->
                           return (TxCount submitted failed (sending - 1), ())
                 | otherwise = (atomically $ tryReadTQueue txQueue) >>= \case
-                      Just (key, txOuts) -> do
-                          utxo <- getOwnUtxoForPk $ safeToPublic (fakeSigner key)
-                          etx <- createTx mempty utxo (fakeSigner key) txOuts (toPublic key)
-                          case etx of
-                              Left err -> do
-                                  addTxFailed tpsMVar
-                                  logError (sformat ("Error: "%build%" while trying to send") err)
-                              Right (tx, _) -> do
-                                  res <- submitTxRaw diffusion tx
-                                  addTxSubmit tpsMVar
-                                  logInfo $ if res
-                                      then sformat ("Submitted transaction: "%txaF) tx
-                                      else sformat ("Applied transaction "%txaF%", however no neighbour applied it") tx
+                      Just (tx, _) -> do
+                          res <- submitTxRaw diffusion tx
+                          addTxSubmit tpsMVar
+                          logInfo $ if res
+                                    then sformat ("Submitted transaction: "%txaF) tx
+                                    else sformat ("Applied transaction "%txaF%", however no neighbour applied it") tx
                           delay $ ms delay_
                           logInfo "Continuing to send transactions."
                           sendTxs (n - 1)
