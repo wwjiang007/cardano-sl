@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE GADTs #-}
 
 -- | Tx sending functionality in Auxx.
 
@@ -111,15 +112,18 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                 txOutValue = val1
                 }
             txOuts = TxOutAux txOut1 :| []
-        forM_ (take (conc * duration) (drop startAt keysToSend)) $ \secretKey -> do
-            utxo <- getOwnUtxoForPk $ safeToPublic (fakeSigner secretKey)
-            etx <- createTx mempty utxo (fakeSigner secretKey) txOuts (toPublic secretKey)
-            case etx of
-                Left err -> do
-                    addTxFailed tpsMVar
-                    logError (sformat ("Error: "%build%" while trying to contruct tx") err)
-                Right (tx, _) -> atomically $ writeTQueue txQueue (tx, txOuts)
-
+        -- construct a transaction, and add it to the queue
+        let addTx secretKey = do
+                utxo <- getOwnUtxoForPk $ safeToPublic (fakeSigner secretKey)
+                etx <- createTx mempty utxo (fakeSigner secretKey) txOuts (toPublic secretKey)
+                case etx of
+                    Left err -> do
+                        addTxFailed tpsMVar
+                        logError (sformat ("Error: "%build%" while trying to contruct tx") err)
+                    Right (tx, _) -> atomically $ writeTQueue txQueue (tx, txOuts)
+        let nTrans = conc * duration -- number of transactions we'll send
+            allTrans = take nTrans (drop startAt keysToSend)
+            (firstBatch, secondBatch) = splitAt (nTrans `div` 2) allTrans
             -- every <slotDuration> seconds, write the number of sent and failed transactions to a CSV file.
         let writeTPS :: m ()
             writeTPS = do
@@ -154,11 +158,21 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                           sendTxs (n - 1)
                       Nothing -> logInfo "No more transactions in the queue."
             sendTxsConcurrently n = void $ forConcurrently [1..conc] (const (sendTxs n))
+        -- pre construct the first batch of transactions. Otherwise,
+        -- we'll be CPU bound and will not achieve high transaction
+        -- rates. If we pre construct all the transactions, the
+        -- startup time will be quite long.
+        forM_  firstBatch addTx
         -- Send transactions while concurrently writing the TPS numbers every
         -- slot duration. The 'writeTPS' action takes care to *always* write
         -- after every slot duration, even if it is killed, so as to
         -- guarantee that we don't miss any numbers.
-        void $ concurrently writeTPS (sendTxsConcurrently duration)
+        --
+        -- While we're sending, we're constructing the second batch of
+        -- transactions.
+        void $
+            concurrently (forM_ secondBatch addTx) $
+            concurrently writeTPS (sendTxsConcurrently duration)
 
 ----------------------------------------------------------------------------
 -- Casual sending
