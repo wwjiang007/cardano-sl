@@ -31,7 +31,6 @@ import           Test.QuickCheck (Arbitrary (..), Gen, choose, oneof, scale, shr
 import           Test.QuickCheck.Arbitrary.Generic (genericArbitrary, genericShrink)
 import           Test.QuickCheck.Instances ()
 
-import           Pos.Arbitrary.Crypto ()
 import           Pos.Binary.Class (Bi)
 import           Pos.Binary.Core ()
 import           Pos.Binary.Crypto ()
@@ -53,6 +52,8 @@ import           Pos.Data.Attributes (Attributes (..), UnparsedFields (..))
 import           Pos.Merkle (MerkleTree, mkMerkleTree)
 import           Pos.Util.QuickCheck.Arbitrary (nonrepeating)
 import           Pos.Util.Util (leftToPanic)
+
+import           Test.Pos.Arbitrary.Crypto ()
 
 {- NOTE: Deriving an 'Arbitrary' instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
