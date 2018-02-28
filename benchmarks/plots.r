@@ -370,3 +370,67 @@ plotMempools(data %>% filter(!(node %in% relays)), 'core')
 plotMempools(data %>% filter((node %in% relays) & (!(node %in% uRelays))), 'privileged relay')
 
 plotTimes(data %>% filter(!(node %in% relays)), 'core')
+
+readOSmetrics <- function(nodename) {
+ fn <- paste(bp, '/', nodename, '-ts.log', sep='')
+ metrics <- {}
+  if (file.exists(fn)) {
+    # add to read.csv?   stringsAsFactors=FALSE
+    metrics <- read.csv(fn, as.is = c(TRUE), header=FALSE, skip=5, sep=" ")
+    colnames(metrics)[1:2] <- c("time", "stats")
+    metrics$io <- select(metrics %>% filter(stats %in% c("io")), time : V9)
+    colnames(metrics$io) <- c("time", "stats", "rchar", "wchar", "syscr", "syscw", "readbytes", "writebytes", "cxwbytes")
+    # plot(as.numeric(as.character(osmetrics_io$wchar)))
+    metrics$statm <- select(metrics %>% filter(stats %in% c("statm")), time : V9)
+    colnames(metrics$statm) <- c("time", "stats", "size", "resident", "shared", "text", "lib", "data", "dt")
+    # plot(osmetrics_statm$size)
+    metrics$stat <- metrics %>% filter(stats %in% c("stat"))
+    colnames(metrics$stat) <- c("time", "stats", "pid", "comm", "state", "ppid", "pgrp", "session", "tty", "tpgid", "flags", "minflt","cminflt","majflt","cmajflt", "utime", "stime", "cutime", "cstime", "priority", "nice", "nthr", "itrv", "starttime", "vsize", "rss", "rsslim", "startcode", "endcode", "startstack", "kstkesp", "kstkeip", "signal",
+                                  "blocked", "sigignore", "sigcatch", "wchan", "nswap", "cnswap", "exitsig", "processor", "rtprio", "policy", "delayio", "guesttime", "cguesttime", "startdata", "enddata", "startbrk", "argstart", "argend", "envstart", "envend", "exitcode")
+    # plot(osmetrics_stat$nthr)
+    # plot(osmetrics_stat$vsize)
+
+  }
+  metrics
+}
+
+plotStatMetrics <- function(d, run=RUN, desc=DESC) {
+    ggplot(d, aes(x=time-d[1, "time"], y=d$utime+d$stime)) +
+        geom_point(aes(colour=node)) +
+        geom_smooth() +
+        ggtitle(paste(
+            'CPU times for core nodes'
+         , run, desc, sep = ' ')) +
+        xlab("t [s]") +
+        ylab("Time spent for CPU") +
+        guides(size = "none", colour = "legend", alpha = "none")
+}
+
+plotIOMetrics <- function(d, run=RUN, desc=DESC) {
+    ggplot(d, aes(x=time-d[1, "time"], y=wchar)) +
+        geom_point(aes(colour=node)) +
+        geom_smooth() +
+        ggtitle(paste(
+            'IO writes for core nodes'
+         , run, desc, sep = ' ')) +
+        xlab("t [s]") +
+        ylab("IO write operations") +
+        guides(size = "none", colour = "legend", alpha = "none")
+}
+
+stat <- {}
+io   <- {}
+stam <- {}
+for (n in coreNodes) {
+    temp <- readOSmetrics(n)
+    temp$statm$node <- n
+    temp$io$node    <- n
+    temp$stat$node  <- n
+    stat  <- rbind(stat, temp$stat)
+    io    <- rbind(io, temp$io)
+    statm <- rbind(stam, temp$statm)
+}
+plotStatMetrics(stat)
+ggsave(paste('stat-', RUN, '.png', sep=''))
+plotIOMetrics(io)
+ggsave(paste('io-', RUN, '.png', sep=''))
