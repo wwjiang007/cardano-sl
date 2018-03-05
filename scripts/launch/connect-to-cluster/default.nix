@@ -29,6 +29,9 @@ let
       relays = "relays.awstest.iohkdev.io";
       confKey = "mainnet_dryrun_full";
     };
+    override = {
+      inherit relays confKey;
+    };
   };
   executables =  {
     wallet = "${iohkPkgs.cardano-sl-wallet-new}/bin/cardano-node";
