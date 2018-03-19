@@ -6,7 +6,6 @@ module Pos.Txp.MemState.Types
        ( GenericTxpLocalData (..)
        , GenericTxpLocalDataPure
        , TxpLocalData
-       , TxpLocalDataPure
        , MemPoolModifyReason (..)
        , JLTxR (..)
        ) where
@@ -40,9 +39,6 @@ type GenericTxpLocalDataPure extra = (UtxoModifier, MemPool, UndoMap, HeaderHash
 
 -- | Memory state of Txp. This version is used by actual Txp implementation.
 type TxpLocalData = GenericTxpLocalData ()
-
--- | Pure version of TxpLocalData.
-type TxpLocalDataPure = GenericTxpLocalDataPure ()
 
 -- | Enumeration of all reasons for modifying the mempool.
 data MemPoolModifyReason =
