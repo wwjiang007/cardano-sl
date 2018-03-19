@@ -59,9 +59,9 @@ recordTxpMetrics ekgStore memPoolVar = do
         , slmAcquire = \reason timeWaited -> do
               liftIO $ Metrics.Gauge.dec ekgMemPoolQueueLength
               let ekgMemPoolWaitTime = case reason of
-                      ApplyBlock -> ekgMemPoolWaitTimeApplyBlock
+                      ApplyBlock             -> ekgMemPoolWaitTimeApplyBlock
                       ApplyBlockWithRollback -> ekgMemPoolWaitTimeApplyBlockWithRollback
-                      ProcessTransaction _ -> ekgMemPoolWaitTimeProcessTx
+                      ProcessTransaction     -> ekgMemPoolWaitTimeProcessTx
               timeWaited' <- liftIO $ Metrics.Gauge.read ekgMemPoolWaitTime
               -- Assume a 0-value estimate means we haven't taken
               -- any samples yet.
@@ -78,7 +78,7 @@ recordTxpMetrics ekgStore memPoolVar = do
               let ekgMemPoolModifyTime = case reason of
                       ApplyBlock             -> ekgMemPoolModifyTimeApplyBlock
                       ApplyBlockWithRollback -> ekgMemPoolModifyTimeApplyBlockWithRollback
-                      ProcessTransaction _   -> ekgMemPoolModifyTimeProcessTx
+                      ProcessTransaction     -> ekgMemPoolModifyTimeProcessTx
               timeElapsed' <- liftIO $ Metrics.Gauge.read ekgMemPoolModifyTime
               let new_ = if timeElapsed' == 0
                         then fromIntegral timeElapsed

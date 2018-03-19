@@ -44,14 +44,6 @@ type TxpLocalData = GenericTxpLocalData ()
 -- | Pure version of TxpLocalData.
 type TxpLocalDataPure = GenericTxpLocalDataPure ()
 
--- TODO COMMENT
-data TransactionProvenance
-    = FromPeer PeerId
-    | History
-    deriving (Show)
-
-$(deriveJSON defaultOptions ''TransactionProvenance)
-
 -- | Enumeration of all reasons for modifying the mempool.
 data MemPoolModifyReason =
       -- | Apply a block created by someone else.
@@ -61,7 +53,7 @@ data MemPoolModifyReason =
       -- | Apply a block created by us.
     | CreateBlock
       -- | Include a transaction. It came from this peer.
-    | ProcessTransaction TransactionProvenance
+    | ProcessTransaction
       -- TODO COMMENT
     | Custom Text
       -- TODO COMMENT

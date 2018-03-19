@@ -35,8 +35,8 @@ throughput f txW waitW cnt xs ys =
   where
     wait :: (NodeId, Timestamp, JLMemPool) -> Maybe (Timestamp, Integer)
     wait (_, t, JLMemPool{..}) = case jlmReason of
-        ProcessTransaction _ -> Just (t, jlmWait)
-        _                    -> Nothing
+        ProcessTransaction -> Just (t, jlmWait)
+        _                  -> Nothing
 
     lg :: Double -> Double -> Double
     lg m x = logBase 10 (max x m) - 6
