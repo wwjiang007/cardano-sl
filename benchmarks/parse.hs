@@ -80,4 +80,3 @@ main = do
           [] -> print "[]"
           ((n,h):_) -> putStrLn $ ((pack . show) n) `append` " " `append` h
   return ()
-
