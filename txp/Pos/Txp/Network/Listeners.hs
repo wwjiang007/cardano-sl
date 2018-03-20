@@ -12,7 +12,8 @@ module Pos.Txp.Network.Listeners
        , TxpMode
        ) where
 
-import           Data.Tagged (Tagged (..))
+import qualified Data.HashMap.Strict as HM
+import           Data.Tagged (Tagged (..), tagWith)
 import           Formatting (build, sformat, (%))
 import           Node.Message.Class (Message)
 import           System.Wlog (WithLogger, logInfo)
@@ -20,10 +21,13 @@ import           Universum
 
 import           Pos.Binary.Txp ()
 import           Pos.Communication.Limits.Types (MessageLimited)
+import           Pos.Communication.Relay (InvReqDataParams (..), MempoolParams (..), Relay (..))
 import qualified Pos.Communication.Relay as Relay
+import           Pos.Communication.Types.Protocol (MsgType (..))
 import           Pos.Core.Txp (TxAux (..), TxId)
 import           Pos.Crypto (hash)
-import           Pos.Txp.MemState (MempoolExt, MonadTxpLocal, MonadTxpMem, txpProcessTx, JLTxR (..))
+import           Pos.Txp.MemState (JLTxR (..), MempoolExt, MonadTxpLocal, MonadTxpMem, getMemPool,
+                                   txpProcessTx, withTxpLocalData)
 import           Pos.Txp.Network.Types (TxMsgContents (..))
 import           Pos.Txp.Toil.Types (MemPool (..))
 
@@ -31,6 +35,7 @@ txInvReqDataParams
     :: TxpMode ctx m
     => (JLTxR -> m ())  -- ^ How to log transactions
     -> InvReqDataParams (Tagged TxMsgContents TxId) TxMsgContents m
+
 txInvReqDataParams logTx =
     InvReqDataParams
        { invReqMsgType = MsgTransaction
@@ -42,19 +47,19 @@ txInvReqDataParams logTx =
   where
     txContentsToKey = pure . Tagged . hash . taTx . getTxMsgContents
     txHandleInv (Tagged txId) =
-        not . HM.member txId  . _mpLocalTxs <$> getMemPool
+        not . HM.member txId  . _mpLocalTxs <$> withTxpLocalData getMemPool
     txHandleReq (Tagged txId) =
-        fmap TxMsgContents . HM.lookup txId . _mpLocalTxs <$> getMemPool
+        fmap TxMsgContents . HM.lookup txId . _mpLocalTxs <$> withTxpLocalData getMemPool
     txHandleData (TxMsgContents txAux) =
         handleTxDo logTx txAux
 
-txRelays
+txRelays  -- defined in lib/src/Pos/Diffusion/Full/Txp.hs
     :: TxpMode ctx m
     => (JLTxR -> m ())  -- ^ How to log transactions
     -> [Relay m]
 txRelays logTx = pure $
     InvReqData (KeyMempool (Proxy :: Proxy TxMsgContents)
-                           (map tag . HM.keys . _mpLocalTxs <$> getMemPool)) $
+                           (map tag . HM.keys . _mpLocalTxs <$> withTxpLocalData getMemPool)) $
                (txInvReqDataParams logTx)
   where
     tag = tagWith (Proxy :: Proxy TxMsgContents)

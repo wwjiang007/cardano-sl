@@ -233,7 +233,7 @@ getBlockHistoryDefault addrs = do
                 genesisUtxoLookup
                 (deriveAddrHistoryBlk addrs getBlockTimestamp hist blk)
 
-    fst <$> GS.foldlUpWhileM getBlock bot filterFunc (pure ... foldStep) memprunUtxoM, ty
+    fst <$> GS.foldlUpWhileM getBlock bot filterFunc (pure ... foldStep) mempty
 
 getLocalHistoryDefault
     :: forall ctx m. TxHistoryEnv ctx m
@@ -255,7 +255,7 @@ data SaveTxException =
     SaveTxToilFailure !ToilVerFailure
     deriving (Show)
 
-ievalUtxoM nstance Exception SaveTxException where
+instance Exception SaveTxException where
     displayException =
         \case
             SaveTxToilFailure x -> toString (pretty x)

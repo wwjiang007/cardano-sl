@@ -99,3 +99,18 @@ txRelays logic = pure $
     -- Previous implementation had KeyMempool, but mempool messages are never
     -- used so we drop it.
     InvReqData NoMempool (txInvReqDataParams logic)
+
+{-
+txRelays
+    :: ( DiffusionWorkMode m
+       , HasAdoptedBlockVersionData m
+       )
+    => Logic m
+    -> [Relay m]
+txRelays logic = pure $
+    Relay.InvReqData (Relay.KeyMempool (Proxy :: Proxy TxMsgContents)
+                           (map tag . HM.keys . _mpLocalTxs <$> getMemPool)) $
+               (txInvReqDataParams logTx)
+  where
+    tag = tagWith (Proxy :: Proxy TxMsgContents)
+-}

@@ -37,7 +37,7 @@ import           Serokell.Aeson.Options (defaultOptions)
 import           System.Wlog (WithLogger)
 
 import           Pos.Binary.Core ()
-import           Pos.Block.BHelpers ()
+-- import           Pos.Block.BHelpers ()
 import           Pos.Communication.Relay.Logic (InvReqDataFlowLog)
 import           Pos.Core (EpochIndex (..), HasConfiguration, HeaderHash, SlotId (..), gbHeader,
                            gbhPrevBlock, getSlotIndex, headerHash, headerHashF, mkLocalSlotIndex)
@@ -46,7 +46,7 @@ import           Pos.Core.Block.Genesis (genBlockEpoch)
 import           Pos.Core.Block.Main (mainBlockSlot)
 import           Pos.Core.Txp (txpTxs)
 import           Pos.Crypto (hash, hashHexF)
-import           Pos.Txp (JLTxR (..), MemPoolModifyReason)
+import           Pos.Txp.MemState.Types (JLTxR (..), MemPoolModifyReason)
 
 type BlockId = Text
 type TxId = Text
@@ -83,17 +83,17 @@ data JLMemPool = JLMemPool
       jlmReason      :: MemPoolModifyReason
       -- | Queue length when trying to modify the mempool (not including this
       --   modifier, so it could be 0).
-    , jlmQueueLength :: Int
+    -- , jlmQueueLength :: Int
       -- | Time spent waiting for the lock (microseconds)
     , jlmWait        :: Integer
       -- | Time spent doing the modification (microseconds, while holding the lock).
     , jlmModify      :: Integer
       -- | Size of the mempool before the modification.
-    , jlmSizeBefore  :: Int
+    -- , jlmSizeBefore  :: Int
       -- | Size of the mempool after the modification.
     , jlmSizeAfter   :: Int
       -- | How much memory was allocated during the modification.
-    , jlmAllocated   :: Int
+    -- , jlmAllocated   :: Int
     } deriving Show
 
 -- | Json log event.

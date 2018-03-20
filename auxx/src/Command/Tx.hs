@@ -119,10 +119,9 @@ sendToAllGenesis diffusion (SendToAllGenesisParams duration conc delay_ tpsSentF
                 utxo <- getOwnUtxoForPk $ safeToPublic (fakeSigner secretKey)
                 etx <- createTx mempty utxo (fakeSigner secretKey) txOuts (toPublic secretKey)
                 case etx of
-                    Left err -> do
-                        addTxFailed tpsMVar
-                        logError (sformat ("Error: "%build%" while trying to contruct tx") err)
+                    Left err -> logError (sformat ("Error: "%build%" while trying to construct tx") err)
                     Right (tx, _) -> atomically $ writeTQueue txQueue (tx, txOuts)
+                    -- do addTxFailed tpsMVar in Left err
         let nTrans = conc * duration -- number of transactions we'll send
             allTrans = take nTrans (drop startAt keysToSend)
             (firstBatch, secondBatch) = splitAt ((2 * nTrans) `div` 3) allTrans
