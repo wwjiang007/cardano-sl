@@ -92,7 +92,7 @@ import           Pos.Wallet.WalletMode (MonadBlockchainInfo (..), MonadUpdates (
 import           Pos.Wallet.Web.ClientTypes (AccountId)
 import           Pos.Wallet.Web.Methods (AddrCIdHashes (..))
 import           Pos.Wallet.Web.Mode (getBalanceDefault, getNewAddressWebWallet, getOwnUtxosDefault)
-import           Pos.Wallet.Web.State (MonadWalletDB, WalletState, openMemState)
+import           Pos.Wallet.Web.State (WalletDbReader, WalletDB, openMemState)
 import           Pos.Wallet.Web.Tracking.BListener (onApplyBlocksWebWallet,
                                                     onRollbackBlocksWebWallet)
 
@@ -138,7 +138,7 @@ instance Show WalletTestParams where
 
 data WalletTestContext = WalletTestContext
     { wtcBlockTestContext :: !BlockTestContext
-    , wtcWalletState      :: !WalletState
+    , wtcWalletState      :: !WalletDB
     , wtcUserSecret       :: !(TVar UserSecret)
     -- ^ Secret keys which are used to send transactions
     , wtcRecoveryHeader   :: !RecoveryHeader
@@ -335,7 +335,7 @@ instance MonadKnownPeers WalletTestMode where
 -- Wallet instances
 ----------------------------------------------------------------------------
 
-instance HasLens WalletState WalletTestContext WalletState where
+instance HasLens WalletDB WalletTestContext WalletDB where
     lensOf = wtcWalletState_L
 
 -- For MonadUpdates
@@ -365,7 +365,7 @@ instance HasNodeType WalletTestContext where
 instance HasLens (StateLockMetrics MemPoolModifyReason) WalletTestContext (StateLockMetrics MemPoolModifyReason) where
     lensOf = wtcStateLockMetrics_L
 
-instance HasConfigurations => MonadWalletDB WalletTestContext WalletTestMode
+instance HasConfigurations => WalletDbReader WalletTestContext WalletTestMode
 
 -- TODO remove HasCompileInfo here
 -- when getNewAddressWebWallet won't require MonadWalletWebMode

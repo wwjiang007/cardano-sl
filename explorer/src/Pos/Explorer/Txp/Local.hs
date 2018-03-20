@@ -19,7 +19,7 @@ import           Pos.Slotting (MonadSlots (getCurrentSlot), getSlotStart)
 import           Pos.StateLock (Priority (..), StateLock, StateLockMetrics, withStateLock)
 import           Pos.Txp.Logic.Local (txNormalizeAbstract, txProcessTransactionAbstract)
 import           Pos.Txp.MemState (MempoolExt, MemPoolModifyReason (..), TxpLocalWorkMode,
-                                   getTxpExtra)
+                                   getTxpExtra, withTxpLocalData)
 import           Pos.Txp.Toil (ToilVerFailure (..), Utxo)
 import qualified Pos.Util.Modifier as MM
 import           Pos.Util.Util (HasLens')
@@ -78,7 +78,7 @@ eTxNormalize ::
        forall ctx m. (ETxpLocalWorkMode ctx m)
     => m ()
 eTxNormalize = do
-    extras <- MM.insertionsMap . view eemLocalTxsExtra <$> getTxpExtra
+    extras <- MM.insertionsMap . view eemLocalTxsExtra <$> withTxpLocalData getTxpExtra
     txNormalizeAbstract buildExplorerExtraLookup (normalizeToil' extras)
   where
     normalizeToil' ::

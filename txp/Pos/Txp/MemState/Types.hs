@@ -4,7 +4,6 @@
 
 module Pos.Txp.MemState.Types
        ( GenericTxpLocalData (..)
-       , GenericTxpLocalDataPure
        , TxpLocalData
        , MemPoolModifyReason (..)
        , JLTxR (..)
@@ -12,8 +11,9 @@ module Pos.Txp.MemState.Types
 
 import           Universum
 
-import           Pos.Core.Common                  (HeaderHash)
-import           Pos.Txp.Toil.Types               (MemPool, UndoMap, UtxoModifier)
+import           Data.Aeson.TH (defaultOptions, deriveJSON)
+import           Pos.Core.Common (HeaderHash)
+import           Pos.Txp.Toil.Types (MemPool, UndoMap, UtxoModifier)
 
 -- | LocalData of transactions processing.
 -- There are two invariants which must hold for local data
@@ -33,9 +33,6 @@ data GenericTxpLocalData extra = TxpLocalData
     , txpTip          :: !(TVar HeaderHash)
     , txpExtra        :: !(TVar extra)
     }
-
--- | Pure version of GenericTxpLocalData.
-type GenericTxpLocalDataPure extra = (UtxoModifier, MemPool, UndoMap, HeaderHash, extra)
 
 -- | Memory state of Txp. This version is used by actual Txp implementation.
 type TxpLocalData = GenericTxpLocalData ()
