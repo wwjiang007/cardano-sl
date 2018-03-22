@@ -464,6 +464,7 @@ executable cardano-post-mortem
                        , cardano-sl
                        , cardano-sl-block
                        , cardano-sl-core
+                       , cardano-sl-infra
                        , cardano-sl-txp
                        , cardano-sl-util
                        , containers

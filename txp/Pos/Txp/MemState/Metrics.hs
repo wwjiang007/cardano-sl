@@ -14,9 +14,8 @@ import           System.Wlog (logDebug)
 
 import           Pos.StateLock (StateLockMetrics (..))
 import           Pos.System.Metrics.Constants (withCardanoNamespace)
-import           Pos.Txp.MemState.Types (MemPoolModifyReason (..))
 import           Pos.Txp.Toil.Types (MemPool (_mpSize))
-import           Pos.Util.JsonLog (JLEvent (..), JLMemPool (..))
+import           Pos.Util.JsonLog.Events (JLEvent (..), JLMemPool (..) ,MemPoolModifyReason (..))
 
 -- | 'StateLockMetrics' to record txp MemPool metrics.
 recordTxpMetrics :: Metrics.Store -> TVar MemPool -> IO (StateLockMetrics MemPoolModifyReason)

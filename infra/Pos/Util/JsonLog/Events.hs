@@ -1,21 +1,22 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Some types for json logging.
-module Pos.Util.JsonLog
-       ( JLEvent(..)
+module Pos.Util.JsonLog.Events
+       ( HasJsonLogConfig(..)
+       , JLEvent(..)
        , JLTxS (..)
        , JLTxR (..)
        , JLMemPool (..)
        , JLBlock (..)
        , JLTimedEvent(..)
-       , jlCreatedBlock
-       , jlAdoptedBlock
-       , appendJL
-       , fromJLSlotId
        , JsonLogConfig(..)
-       , HasJsonLogConfig(..)
+       , MemPoolModifyReason (..)
+       , appendJL
+       , jlAdoptedBlock
+       , jlCreatedBlock
        , jsonLogConfigFromHandle
        , jsonLogDefault
+       , fromJLSlotId
        , fromJLSlotIdUnsafe
        ) where
 
@@ -46,7 +47,6 @@ import           Pos.Core.Block.Genesis (genBlockEpoch)
 import           Pos.Core.Block.Main (mainBlockSlot)
 import           Pos.Core.Txp (txpTxs)
 import           Pos.Crypto (hash, hashHexF)
-import           Pos.Txp.MemState.Types (JLTxR (..), MemPoolModifyReason)
 
 type BlockId = Text
 type TxId = Text
@@ -66,6 +66,28 @@ data JLTxS = JLTxS
     , jlsTxId   :: Text
     , jlsInvReq :: InvReqDataFlowLog
     } deriving Show
+
+-- | Json log of one transaction being received by a node.
+data JLTxR = JLTxR
+    { jlrTxId  :: Text
+    , jlrError :: Maybe Text
+    } deriving Show
+
+-- | Enumeration of all reasons for modifying the mempool.
+data MemPoolModifyReason =
+      -- | Apply a block created by someone else.
+      ApplyBlock
+      -- | Apply a block, with rollback
+    | ApplyBlockWithRollback
+      -- | Apply a block created by us.
+    | CreateBlock
+      -- | Include a transaction. It came from this peer.
+    | ProcessTransaction
+      -- TODO COMMENT
+    | Custom Text
+      -- TODO COMMENT
+    | Unknown
+    deriving Show
 
 -- | Get 'SlotId' from 'JLSlotId'.
 fromJLSlotId :: (HasConfiguration, MonadError Text m) => JLSlotId -> m SlotId
@@ -111,6 +133,7 @@ data JLTimedEvent = JLTimedEvent
     , jlEvent     :: JLEvent
     } deriving Show
 
+$(deriveJSON defaultOptions ''MemPoolModifyReason)
 $(deriveJSON defaultOptions ''JLBlock)
 $(deriveJSON defaultOptions ''JLEvent)
 $(deriveJSON defaultOptions ''JLTimedEvent)

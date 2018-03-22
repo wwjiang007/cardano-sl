@@ -67,9 +67,6 @@ library
     Pos.Binary.Txp
     Pos.Binary.Txp.Network
 
-    -- Utilities
-    Pos.Util.JsonLog
-
   build-depends:       QuickCheck
                      , aeson
                      , base
