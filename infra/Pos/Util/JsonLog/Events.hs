@@ -84,7 +84,7 @@ data MemPoolModifyReason =
       -- | Include a transaction. It came from this peer.
     | ProcessTransaction
       -- TODO COMMENT
-    | Custom Text
+    -- | Custom Text
       -- TODO COMMENT
     | Unknown
     deriving Show
@@ -105,17 +105,17 @@ data JLMemPool = JLMemPool
       jlmReason      :: MemPoolModifyReason
       -- | Queue length when trying to modify the mempool (not including this
       --   modifier, so it could be 0).
-    -- , jlmQueueLength :: Int
+    , jlmQueueLength :: Int
       -- | Time spent waiting for the lock (microseconds)
     , jlmWait        :: Integer
       -- | Time spent doing the modification (microseconds, while holding the lock).
     , jlmModify      :: Integer
       -- | Size of the mempool before the modification.
-    -- , jlmSizeBefore  :: Int
+    , jlmSizeBefore  :: Int
       -- | Size of the mempool after the modification.
     , jlmSizeAfter   :: Int
       -- | How much memory was allocated during the modification.
-    -- , jlmAllocated   :: Int
+    , jlmAllocated   :: Int64
     } deriving Show
 
 -- | Json log event.

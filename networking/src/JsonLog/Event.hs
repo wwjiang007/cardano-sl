@@ -72,7 +72,7 @@ instance ToJSON JLTimedEvent where
 
     toJSON (JLTimedEvent (JLTimed ts v)) = object
         [ "timestamp" .= (fromIntegral ts :: Integer)
-        , "event"     .= v
+        , "EVENT"     .= v
         ]
 
 instance FromJSON JLTimedEvent where
