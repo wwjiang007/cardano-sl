@@ -33,6 +33,7 @@ packages:
 - tools
 - wallet
 - wallet-new # The new (unreleased) version of the wallet
+- golden
 
 - location:
     git: https://github.com/well-typed/cborg
@@ -136,6 +137,10 @@ packages:
     git: https://github.com/serokell/log-warper.git
     commit: 7f95c6990ef93a289678755cb1db71c2a4ecdfb5
   extra-dep: true
+- location:
+    git: https://github.com/primetype/inspector
+    commit: b2e49ba7df07187f6bf9feeb505ef325d3bd00ac
+  extra-dep: true
 
 nix:
   shell-file: shell.nix
@@ -190,9 +195,9 @@ extra-deps:
 - unliftio-core-0.1.1.0
 - http-conduit-2.3.0
 - simple-sendfile-0.2.27
-- basement-0.0.6
-- foundation-0.0.19
-- memory-0.14.14
+- basement-0.0.7
+- foundation-0.0.20
+- memory-0.14.16
 - criterion-1.3.0.0
 - gauge-0.2.1
 - statistics-0.14.0.2
