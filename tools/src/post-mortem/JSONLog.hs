@@ -13,10 +13,11 @@ import qualified Pipes.Prelude as P
 import           System.Directory (listDirectory)
 import           System.FilePath ((</>))
 
-import           Pos.Util.JsonLog.Events (JLEvent, JLTimedEvent (..))
+import           Pos.Util.JsonLog.Events (JLEvent)
 import           Types
 import           Universum
 import           Util.Aeson (parseJSONP)
+import           JsonLog.Event (JLTimed (..), JLTimedEvent (..))
 import           Util.Safe (runWithFiles)
 
 jsonLogs :: FilePath -> IO [(Text, FilePath)]
@@ -55,8 +56,8 @@ runParseLogs logDir f = do
     runWithFiles xs ReadMode $ \ys -> f $ interleave (map (uncurry producer) ys)
   where
     producer :: NodeId -> Handle -> Producer IndexedJLTimedEvent IO ()
-    producer n h = parseLogP h >-> P.map (\JLTimedEvent{..} ->
+    producer n h = parseLogP h >-> P.map (\(JLTimedEvent JLTimed{..}) ->
         IndexedJLTimedEvent { ijlNode      = n
-                            , ijlTimestamp = fromIntegral jlTimestamp
-                            , ijlEvent     = jlEvent
+                            , ijlTimestamp = fromIntegral jltTimestamp
+                            , ijlEvent     = jltContent
                             })

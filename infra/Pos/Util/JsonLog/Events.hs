@@ -8,7 +8,7 @@ module Pos.Util.JsonLog.Events
        , JLTxR (..)
        , JLMemPool (..)
        , JLBlock (..)
-       , JLTimedEvent(..)
+       -- , JLTimedEvent(..)
        , JsonLogConfig(..)
        , MemPoolModifyReason (..)
        , appendJL
