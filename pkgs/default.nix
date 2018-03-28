@@ -7424,7 +7424,7 @@ inherit (pkgs) mesa;};
            license = stdenv.lib.licenses.mit;
          }) {};
       "cardano-sl-node" = callPackage
-         ({ mkDerivation, base, cardano-sl, cardano-sl-infra
+        ({ mkDerivation, base, cardano-sl, cardano-sl-infra
          , cardano-sl-networking, cardano-sl-ssc, cardano-sl-update
          , cardano-sl-util, cpphs, log-warper, stdenv, universum
          }:
@@ -7562,8 +7562,8 @@ inherit (pkgs) mesa;};
          , hashable, http-client, http-client-tls, http-conduit, lens
          , log-warper, memory, mtl, QuickCheck, reflection, resourcet
          , rocksdb-haskell-ng, safe-exceptions, serokell-util, stdenv, stm
-         , tagged, template-haskell, text, text-format, time-units
-         , transformers, universum, unliftio, unordered-containers
+         , tagged, template-haskell, text-format, time-units, transformers
+         , universum, unliftio, unordered-containers
          }:
          mkDerivation {
            pname = "cardano-sl-update";
@@ -7577,7 +7577,7 @@ inherit (pkgs) mesa;};
              generic-arbitrary hashable http-client http-client-tls http-conduit
              lens log-warper memory mtl QuickCheck reflection resourcet
              rocksdb-haskell-ng safe-exceptions serokell-util stm tagged
-             template-haskell text text-format time-units transformers universum
+             template-haskell text-format time-units transformers universum
              unliftio unordered-containers
            ];
            libraryToolDepends = [ cpphs ];
