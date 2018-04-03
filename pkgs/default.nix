@@ -455,8 +455,6 @@ let
            pname = "FPretty";
            version = "1.1";
            sha256 = "b8ac0122e923b0e20cee6ba77ffb07dfeaa96a194cdc1622808e97f443a8eb42";
-           revision = "1";
-           editedCabalFile = "0d6mjr7b37f5bgjijjgx4x4fgfmkbhksphzkaf0p5jyzxp45fasc";
            libraryHaskellDepends = [ base containers ];
            doHaddock = false;
            doCheck = false;
@@ -1431,8 +1429,6 @@ inherit (pkgs) zlib;};
            pname = "OneTuple";
            version = "0.2.1";
            sha256 = "4b6f74b6d92df112b0f4eaf15ccdc5fbb763d59f07e9a2afa5690ef89159a2f4";
-           revision = "1";
-           editedCabalFile = "1kb7f21n9vwwrk4kipqdwdqs94k34zai6yy0kgdn22zi442yicjh";
            libraryHaskellDepends = [ base ];
            doHaddock = false;
            doCheck = false;
@@ -5614,8 +5610,6 @@ inherit (pkgs) mesa;};
            pname = "bytestring-trie";
            version = "0.2.4.1";
            sha256 = "2fe4feb526a03d32aaf673506623b3af4ce3fee126f745a8852c5fd676a61363";
-           revision = "1";
-           editedCabalFile = "0f56pb1k1va7bs9rpn0b8hclxhn5pcjln857k50myhyzrwz8qg7r";
            libraryHaskellDepends = [ base binary bytestring ];
            doHaddock = false;
            doCheck = false;
@@ -6717,7 +6711,8 @@ inherit (pkgs) mesa;};
              cardano-sl-networking cardano-sl-ssc cardano-sl-txp
              cardano-sl-update cardano-sl-util containers data-default ether
              formatting hspec lens log-warper MonadRandom mtl QuickCheck
-             serokell-util stm text-format universum unordered-containers
+             safecopy serokell-util stm text-format universum
+             unordered-containers
            ];
            testToolDepends = [ cpphs ];
            doHaddock = false;
@@ -6725,8 +6720,8 @@ inherit (pkgs) mesa;};
            license = stdenv.lib.licenses.mit;
          }) {};
       "cardano-sl-wallet-new" = callPackage
-        ({ mkDerivation, aeson, aeson-pretty, base, bytestring, cardano-sl
-         , cardano-sl-block, cardano-sl-client, cardano-sl-core
+        ({ mkDerivation, acid-state, aeson, aeson-pretty, base, bytestring
+         , cardano-sl, cardano-sl-block, cardano-sl-client, cardano-sl-core
          , cardano-sl-crypto, cardano-sl-db, cardano-sl-delegation
          , cardano-sl-infra, cardano-sl-networking, cardano-sl-ssc
          , cardano-sl-txp, cardano-sl-update, cardano-sl-util
@@ -6775,16 +6770,17 @@ inherit (pkgs) mesa;};
              wai-extra warp
            ];
            testHaskellDepends = [
-             aeson aeson-pretty base bytestring cardano-sl cardano-sl-block
-             cardano-sl-client cardano-sl-core cardano-sl-crypto cardano-sl-db
-             cardano-sl-delegation cardano-sl-infra cardano-sl-networking
-             cardano-sl-ssc cardano-sl-txp cardano-sl-update cardano-sl-util
-             cardano-sl-wallet conduit constraints containers data-default
-             exceptions formatting hspec http-client http-types ixset-typed lens
-             log-warper mmorph mtl neat-interpolation optparse-applicative
-             QuickCheck quickcheck-instances safe-exceptions serokell-util
-             servant servant-quickcheck servant-server servant-swagger stm
-             string-conv swagger2 text text-format time time-units universum
+             acid-state aeson aeson-pretty base bytestring cardano-sl
+             cardano-sl-block cardano-sl-client cardano-sl-core
+             cardano-sl-crypto cardano-sl-db cardano-sl-delegation
+             cardano-sl-infra cardano-sl-networking cardano-sl-ssc
+             cardano-sl-txp cardano-sl-update cardano-sl-util cardano-sl-wallet
+             conduit constraints containers data-default exceptions formatting
+             hspec http-client http-types ixset-typed lens log-warper mmorph mtl
+             neat-interpolation optparse-applicative QuickCheck
+             quickcheck-instances safe-exceptions serokell-util servant
+             servant-quickcheck servant-server servant-swagger stm string-conv
+             swagger2 text text-format time time-units universum
              unordered-containers
            ];
            doHaddock = false;
@@ -29386,8 +29382,8 @@ inherit (pkgs) libjpeg; inherit (pkgs) libpng; inherit (pkgs) zlib;};
            pname = "protolude";
            version = "0.2.1";
            sha256 = "bdbf0e47f8cb8501df93eadfeaaa3a914cebbdd598e6c8b52ee7136c7a574be4";
-           revision = "3";
-           editedCabalFile = "1d6yrx1dj1qqml5rfspfabi7wkhn9i87z7dbq3zsbwk5ywdzwkq8";
+           revision = "2";
+           editedCabalFile = "03w9051jdbldbid9iyvibdhxdr73cawrvp9qdsc0czxix5ggfr75";
            libraryHaskellDepends = [
              array async base bytestring containers deepseq ghc-prim hashable
              mtl mtl-compat safe stm text transformers transformers-compat
@@ -36470,8 +36466,6 @@ inherit (pkgs) libjpeg; inherit (pkgs) libpng; inherit (pkgs) zlib;};
            pname = "th-orphans";
            version = "0.13.5";
            sha256 = "95644d4b7914317e1dd31095947b8371f1a18be0c09e75f0e29203eb774a25ad";
-           revision = "1";
-           editedCabalFile = "1rgsrnh0qvlriz0c2c3q8wbb3ykby8d3lli0j553ml3n1sn9k4zv";
            libraryHaskellDepends = [
              base mtl template-haskell th-lift th-lift-instances th-reify-many
            ];
@@ -40665,8 +40659,6 @@ inherit (pkgs) libjpeg; inherit (pkgs) libpng; inherit (pkgs) zlib;};
            pname = "x509";
            version = "1.7.3";
            sha256 = "41740f949bb773dc721d342a85587a512658c81ee8cd38f102473b315e127356";
-           revision = "1";
-           editedCabalFile = "06zzirygvzp0ssdg9blipdwmd0b41p4gxh3ldai7ngjyjsdclwsx";
            libraryHaskellDepends = [
              asn1-encoding asn1-parse asn1-types base bytestring containers
              cryptonite hourglass memory mtl pem
