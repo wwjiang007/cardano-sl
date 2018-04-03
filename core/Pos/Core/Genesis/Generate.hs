@@ -118,7 +118,9 @@ generateGenesisData (GenesisInitializer{..}) realAvvmBalances = deterministic (s
     (fakeAvvmDistr, fakeAvvmSeeds, fakeAvvmBalance) <- generateFakeAvvmGenesis giFakeAvvmBalance
 
     -- Generate all secrets
-    let replicateRich = replicateM (fromIntegral tboRichmen)
+    let replicateRich :: forall a m . Applicative m => m a -> m [a]
+        replicateRich = replicateM (fromIntegral tboRichmen)
+        replicatePoor :: forall a m . Applicative m => m a -> m [a]
         replicatePoor = replicateM (fromIntegral tboPoors)
         genPoorSecret | tboUseHDAddresses = PoorEncryptedSecret . snd <$> safeKeyGen emptyPassphrase
                       | otherwise = PoorSecret . snd <$> keyGen

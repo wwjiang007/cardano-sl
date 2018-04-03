@@ -4,7 +4,7 @@ module Pos.Arbitrary.Crypto
        ( SharedSecrets (..)
        ) where
 
-import           Universum
+import           Universum hiding (keys)
 
 import           Control.Monad (zipWithM)
 import qualified Data.ByteArray as ByteArray

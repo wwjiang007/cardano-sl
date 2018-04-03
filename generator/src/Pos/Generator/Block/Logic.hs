@@ -24,7 +24,6 @@ import           Pos.Block.Logic (applyBlocksUnsafe, createMainBlockInternal, no
 import           Pos.Block.Slog (ShouldCallBListener (..))
 import           Pos.Block.Types (Blund)
 import           Pos.Communication.Message ()
-import           Pos.Communication.Limits (HasAdoptedBlockVersionData)
 import           Pos.Core (EpochOrSlot (..), SlotId (..), addressHash, epochIndexL, getEpochOrSlot,
                            getSlotIndex)
 import           Pos.Core.Block (Block)
@@ -55,7 +54,6 @@ type BlockTxpGenMode g ctx m =
     , HasLens' ctx TxpGlobalSettings
     , Default (MempoolExt m)
     , MonadTxpLocal (BlockGenMode (MempoolExt m) m)
-    , HasAdoptedBlockVersionData (BlockGenMode (MempoolExt m) m)
     )
 
 -- | Generate an arbitrary sequence of valid blocks. The blocks are
@@ -96,7 +94,6 @@ genBlock ::
        , MonadBlockGen ctx m
        , Default (MempoolExt m)
        , MonadTxpLocal (BlockGenMode (MempoolExt m) m)
-       , HasAdoptedBlockVersionData (BlockGenMode (MempoolExt m) m)
        )
     => EpochOrSlot
     -> BlockGenRandMode (MempoolExt m) g m (Maybe Blund)
