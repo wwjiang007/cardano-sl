@@ -13,17 +13,18 @@ import           Universum
 import qualified Data.Text.Buildable
 import           Formatting (bprint, stext, (%))
 
-import           Cardano.Wallet.API.V1.Types (WalletId)
+import           Cardano.Wallet.API.V1.Types (WalletId, AccountIndex)
 
 
 data WalletLayerError
     = MissingWallet WalletId
-    | MissingAccount
+    | MissingAccount AccountIndex
     deriving (Show, Eq, Generic)
 
 instance Exception WalletLayerError
 
 instance Buildable WalletLayerError where
-    build (MissingWallet wId)   = bprint ("Missing wallet with wallet id ("%stext%").") (show wId)
-    build (MissingAccount)      = bprint ("Missing account.")
+    build (MissingWallet  wId  ) = bprint ("Missing wallet with wallet id ("%stext%").") (show wId)
+    build (MissingAccount accId) = bprint ("Missing account with account id ("%stext%").") (show accId)
+
 
