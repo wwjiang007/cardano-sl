@@ -15,12 +15,13 @@ import qualified Crypto.Sign.Ed25519 as EdStandard
 import qualified Data.ByteArray as ByteArray
 import qualified Data.ByteString as BS
 import           Formatting (int, sformat, (%))
-
+import           Serokell.Data.Memory.Units (Byte)
 
 import qualified Codec.CBOR.Decoding as D
 import qualified Codec.CBOR.Encoding as E
 import           Pos.Binary.Class (AsBinary (..), Bi (..), Cons (..), Field (..), decodeBinary,
-                                   deriveSimpleBi, encodeBinary, encodeListLen, enforceSize)
+                                   deriveSimpleBi, encodeBinary, encodedSizeBinary,
+                                   encodeListLen, enforceSize)
 import           Pos.Crypto.AsBinary (decShareBytes, encShareBytes, secretBytes, vssPublicKeyBytes)
 import           Pos.Crypto.Hashing (AbstractHash (..), HashAlgorithm, WithHash (..), withHash)
 import           Pos.Crypto.HD (HDAddressPayload (..))
@@ -53,6 +54,7 @@ instance (Typeable algo, Typeable a, HashAlgorithm algo) => Bi (AbstractHash alg
         toCborError $ case digestFromByteString bs of
             Nothing -> Left "AbstractHash.decode: invalid digest"
             Just x  -> Right (AbstractHash x)
+    encodedSize (AbstractHash digest) = encodedSize (ByteArray.convert digest :: BS.ByteString)
 
 ----------------------------------------------------------------------------
 -- SecretSharing
@@ -61,48 +63,57 @@ instance (Typeable algo, Typeable a, HashAlgorithm algo) => Bi (AbstractHash alg
 instance Bi Scrape.PublicKey where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 deriving instance Bi C.VssPublicKey
 
 instance Bi Scrape.KeyPair where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 deriving instance Bi C.VssKeyPair
 
 instance Bi Scrape.Secret where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 deriving instance Bi C.Secret
 
 instance Bi Scrape.DecryptedShare where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 deriving instance Bi C.DecShare
 
 instance Bi Scrape.EncryptedSi where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 deriving instance Bi C.EncShare
 
 instance Bi Scrape.ExtraGen where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 instance Bi Scrape.Commitment where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 instance Bi Scrape.Proof where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 instance Bi Scrape.ParallelProofs where
     encode = encodeBinary
     decode = decodeBinary
+    encodedSize = encodedSizeBinary
 
 deriveSimpleBi ''C.SecretProof [
     Cons 'C.SecretProof [
@@ -152,9 +163,13 @@ encodeXSignature a = encode $ CC.unXSignature a
 decodeXSignature :: D.Decoder s CC.XSignature
 decodeXSignature = toCborError . over _Left fromString . CC.xsignature =<< decode
 
+encodedSizeXSignature :: CC.XSignature -> Byte
+encodedSizeXSignature a = encodedSize $ CC.unXSignature a
+
 instance Typeable a => Bi (Signature a) where
     encode (Signature a) = encodeXSignature a
     decode = fmap Signature decodeXSignature
+    encodedSize (Signature a) = encodedSizeXSignature a
 
 encodeXPub :: CC.XPub -> E.Encoding
 encodeXPub a = encode $ CC.unXPub a
@@ -162,9 +177,13 @@ encodeXPub a = encode $ CC.unXPub a
 decodeXPub :: D.Decoder s CC.XPub
 decodeXPub = toCborError . over _Left fromString . CC.xpub =<< decode
 
+encodedSizeXPub :: CC.XPub -> Byte
+encodedSizeXPub a = encodedSize $ CC.unXPub a
+
 instance Bi PublicKey where
     encode (PublicKey a) = encodeXPub a
     decode = fmap PublicKey decodeXPub
+    encodedSize (PublicKey a) = encodedSizeXPub a
 
 encodeXPrv :: CC.XPrv -> E.Encoding
 encodeXPrv a = encode $ CC.unXPrv a
@@ -172,9 +191,13 @@ encodeXPrv a = encode $ CC.unXPrv a
 decodeXPrv :: D.Decoder s CC.XPrv
 decodeXPrv = toCborError . over _Left fromString . CC.xprv =<< decode @ByteString
 
+encodedSizeXPrv :: CC.XPrv -> Byte
+encodedSizeXPrv a = encodedSize $ CC.unXPrv a
+
 instance Bi SecretKey where
     encode (SecretKey a) = encodeXPrv a
     decode = fmap SecretKey decodeXPrv
+    encodedSize (SecretKey a) = encodedSizeXPrv a
 
 instance Bi EncryptedSecretKey where
     encode (EncryptedSecretKey sk pph) = encodeListLen 2
@@ -184,6 +207,8 @@ instance Bi EncryptedSecretKey where
          <$  enforceSize "EncryptedSecretKey" 2
          <*> decodeXPrv
          <*> decode
+    encodedSize (EncryptedSecretKey sk pph) =
+        1 + encodedSizeXPrv sk + encodedSize pph
 
 instance Bi a => Bi (Signed a) where
     encode (Signed v s) = encodeListLen 2
@@ -193,10 +218,13 @@ instance Bi a => Bi (Signed a) where
          <$  enforceSize "Signed" 2
          <*> decode
          <*> decode
+    encodedSize (Signed v s) =
+        1 + encodedSize v + encodedSize s
 
 instance Typeable w => Bi (ProxyCert w) where
     encode (ProxyCert a) = encodeXSignature a
     decode = fmap ProxyCert decodeXSignature
+    encodedSize (ProxyCert a) = encodedSizeXSignature a
 
 instance Bi w => Bi (ProxySecretKey w) where
     encode UnsafeProxySecretKey{..} =
@@ -212,6 +240,11 @@ instance Bi w => Bi (ProxySecretKey w) where
         pskDelegatePk <- decode
         pskCert       <- decode
         pure UnsafeProxySecretKey {..}
+    encodedSize UnsafeProxySecretKey{..} =
+        1 + encodedSize pskOmega
+          + encodedSize pskIssuerPk
+          + encodedSize pskDelegatePk
+          + encodedSize pskCert
 
 instance (Typeable a, Bi w) =>
          Bi (ProxySignature w a) where
@@ -222,6 +255,8 @@ instance (Typeable a, Bi w) =>
           <$  enforceSize "ProxySignature" 2
           <*> decode
           <*> decodeXSignature
+    encodedSize ProxySignature{..} =
+        1 + encodedSize psigPsk + encodedSizeXSignature psigSig
 
 instance Bi PassPhrase where
     encode pp = encode (ByteArray.convert pp :: ByteString)
@@ -235,10 +270,12 @@ instance Bi PassPhrase where
             else Left $ sformat
                  ("put@PassPhrase: expected length 0 or "%int%", not "%int)
                  passphraseLength bl
+    encodedSize pp = encodedSize (ByteArray.convert pp :: ByteString)
 
 instance Bi EncryptedPass where
     encode (EncryptedPass ep) = encode ep
     decode = EncryptedPass <$> decode
+    encodedSize (EncryptedPass ep) = encodedSize ep
 
 -------------------------------------------------------------------------------
 -- Hierarchical derivation
@@ -247,6 +284,7 @@ instance Bi EncryptedPass where
 instance Bi HDAddressPayload where
     encode (HDAddressPayload payload) = encode payload
     decode = HDAddressPayload <$> decode
+    encodedSize (HDAddressPayload payload) = encodedSize payload
 
 -------------------------------------------------------------------------------
 -- Standard Ed25519 instances for ADA redeem keys
@@ -255,14 +293,17 @@ instance Bi HDAddressPayload where
 instance Bi EdStandard.PublicKey where
     encode (EdStandard.PublicKey k) = encode k
     decode = EdStandard.PublicKey <$> decode
+    encodedSize (EdStandard.PublicKey k) = encodedSize k
 
 instance Bi EdStandard.SecretKey where
     encode (EdStandard.SecretKey k) = encode k
     decode = EdStandard.SecretKey <$> decode
+    encodedSize (EdStandard.SecretKey k) = encodedSize k
 
 instance Bi EdStandard.Signature where
     encode (EdStandard.Signature s) = encode s
     decode = EdStandard.Signature <$> decode
+    encodedSize (EdStandard.Signature s) = encodedSize s
 
 deriving instance Bi RedeemPublicKey
 deriving instance Bi RedeemSecretKey
