@@ -45,6 +45,13 @@ instance ( Typeable b
         _gbhExtra     <- decode
         pure T.UnsafeGenericBlockHeader {..}
 
+    encodedSize bh =
+            1 + encodedSize (getProtocolMagic protocolMagic)
+              + encodedSize (T._gbhPrevBlock bh)
+              + encodedSize (T._gbhBodyProof bh)
+              + encodedSize (T._gbhConsensus bh)
+              + encodedSize (T._gbhExtra bh)
+
 instance ( Typeable b
          , Bi (T.BHeaderHash b)
          , Bi (T.BodyProof b)
@@ -55,16 +62,23 @@ instance ( Typeable b
          , HasCryptoConfiguration
          ) =>
          Bi (T.GenericBlock b) where
+
     encode gb =  encodeListLen 3
               <> encode (T._gbHeader gb)
               <> encode (T._gbBody gb)
               <> encode (T._gbExtra gb)
+
     decode = do
         enforceSize "GenericBlock" 3
         _gbHeader <- decode
         _gbBody   <- decode
         _gbExtra  <- decode
         pure T.UnsafeGenericBlock {..}
+
+    encodedSize gb =
+            1 + encodedSize (T._gbHeader gb)
+              + encodedSize (T._gbBody gb)
+              + encodedSize (T._gbExtra gb)
 
 ----------------------------------------------------------------------------
 -- BlockHeader
@@ -86,3 +100,9 @@ instance ( HasConfiguration
            0 -> BlockHeaderGenesis <$!> decode
            1 -> BlockHeaderMain <$!> decode
            _ -> cborError $ "decode@BlockHeader: unknown tag " <> pretty t
+
+   encodedSize x = 2 + bodySize
+     where
+       bodySize = case x of
+         BlockHeaderGenesis bh -> encodedSize bh
+         BlockHeaderMain bh    -> encodedSize bh
