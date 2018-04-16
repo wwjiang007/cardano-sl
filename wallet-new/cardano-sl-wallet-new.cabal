@@ -171,8 +171,10 @@ executable cardano-node
                      , QuickCheck
                      , aeson
                      , aeson-pretty
+                     , base58-bytestring
                      , bytestring
                      , conduit
+                     , cardano-crypto
                      , cardano-sl
                      , cardano-sl-client
                      , cardano-sl-core
